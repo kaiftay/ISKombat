@@ -1,31 +1,121 @@
 window.onload = function() {
-
+    let date = new Date();
+    const allowableFps = 24;
+    const delta = 1000/allowableFps;
+    let fighter1State = "STANDING";
+    let fighter1Frame = 0;
+    let fighter2State = "STANDING";
+    let fighter2Frame = 0;
     const server = new Server(callChallengeCB, isAcceptChallengeCB, renderCB);
     const graph = new Graph();
-    const fighter1Img = new Image();
-    const fighter2Img = new Image();
     const backgroundImg = new Image();
-    fighter1Img.src = "../public/img/Sprite_N.png";
-    fighter2Img.src = "../public/img/Sprite_A(mirrored).png";
+    const standingRight = new Image();
+    standingRight.src = "../public/img/standing_r.png";
+    const standingLeft = new Image();
+    standingLeft.src = "../public/img/standing_l.png";
+    const sitLeft = new Image();
+    sitLeft.src =  "../public/img/sit_l.png";
+    const sitRight = new Image();
+    sitRight.src = "../public/img/sit_r.png";
+    const hitLegLeft = new Image();
+    hitLegLeft.src =  "../public/img/hitLeg_l.png";
+    const hitLegRight = new Image();
+    hitLegRight.src = "../public/img/hitLeg_r.png";
+    const hitLeft = new Image();
+    hitLeft.src =  "../public/img/hit_l.png";
+    const hitRight = new Image();
+    hitRight.src = "../public/img/hit_r.png";
+    const walkingLeft = new Image();
+    walkingLeft.src =  "../public/img/walking_l.png";
+    const walkingRight = new Image();
+    walkingRight.src = "../public/img/walking_r.png";
     backgroundImg.src = "../public/img/UDSU.png"
     //TODO: cut all fighter pics, depending on state
-    const FIGHTER_PICS_right = {
-        STANDING: { sx: 390, sy: 0, sWidth: 400, sHeight: 1200 },
-        CROUCHING: { sx: 6307, sy: 0, sWidth: 514, sHeight: 1200 },
-        HITARM: { sx: 4001, sy: 0, sWidth: 532, sHeight: 1200 },
-        HITLEG: { sx: 5125, sy: 0, sWidth: 850, sHeight: 1200 },
-        MOVING: { sx: 1493, sy: 0, sWidth: 502, sHeight: 1200 },
-        DEAD: { sx: 11992, sy: 0, sWidth: 1207, sHeight: 1200 }
+    const LEFT_SPRITE = {
+        STANDING: {
+            width: standingLeft.width/5,
+            height: standingLeft.height/3,
+            frames: 12,
+            cols: 5,
+            rows: 3,
+            img: standingLeft
+        },
+        CROUCHING: {
+            width: sitLeft.width/2,
+            height: sitLeft.height/2,
+            frames: 3,
+            cols: 2,
+            rows: 2,
+            img: sitLeft
+        },
+      HITLEG: {
+        width: hitLegLeft.width/2,
+        height: hitLegLeft.height/2,
+        frames: 3,
+        cols: 2,
+        rows: 2,
+        img: hitLegLeft
+      },
+      HITARM: {
+        width: hitLeft.width/2,
+        height: hitLeft.height/2,
+        frames: 3,
+        cols: 2,
+        rows: 2,
+        img: hitLeft
+      },
+      WALKING: {
+        width: walkingLeft.width/4,
+        height: walkingLeft.height/3,
+        frames: 9,
+        cols: 4,
+        rows: 3,
+        img: walkingLeft
+      }
     }
 
-    const FIGHTER_PICS_left = {
-        STANDING: { sx: 375, sy: 0, sWidth: 472, sHeight: 1200 },
-        CROUCHING: { sx: 6410, sy: 0, sWidth: 445, sHeight: 1200 },
-        HITARM: { sx: 3771, sy: 0, sWidth: 668, sHeight: 1200 },
-        HITLEG: { sx: 4881, sy: 0, sWidth: 854, sHeight: 1200 },
-        MOVING: { sx: 1579, sy: 0, sWidth: 520, sHeight: 1200 },
-        DEAD: { sx: 11996, sy: 0, sWidth: 1203, sHeight: 1200 }
-    }
+    const RIGHT_SPRITE = {
+      STANDING: {
+        width: standingRight.width/5,
+        height: standingRight.height/3,
+        frames: 12,
+        cols: 5,
+        rows: 3,
+        img: standingRight
+      },
+      CROUCHING: {
+        width: sitRight.width/2,
+        height: sitRight.height/2,
+        frames: 3,
+        cols: 2,
+        rows: 2,
+        img: sitRight
+      },
+      HITLEG: {
+        width: hitLegRight.width/2,
+        height: hitLegRight.height/2,
+        frames: 3,
+        cols: 2,
+        rows: 2,
+        img: hitLegRight
+      },
+      HITARM: {
+        width: hitRight.width/2,
+        height: hitRight.height/2,
+        frames: 3,
+        cols: 2,
+        rows: 2,
+        img: hitRight
+      },
+      WALKING: {
+        width: walkingRight.width/4,
+        height: walkingRight.height/3,
+        frames: 9,
+        cols: 4,
+        rows: 3,
+        img: walkingRight
+      }
+      };
 
     function getTime(ms) {
         ms = Math.floor(ms / 1000);
@@ -37,9 +127,21 @@ window.onload = function() {
     }
 
     function render(data) {
-
+        let newDate = new Date();
+        if ((newDate - date) < delta) {
+            return;
+        }
         const fighter1 = data.fighters[0];
         const fighter2 = data.fighters[1];
+        if (fighter1State !== fighter1.state) {
+            fighter1Frame = 0;
+            fighter1State = fighter1.state;
+        }
+        if (fighter2State !== fighter2.state) {
+            fighter2Frame = 0;
+            fighter2State = fighter2.state;
+
+        }
 
         graph.clear();
         graph.sprite(backgroundImg, 0, 0);
@@ -53,19 +155,37 @@ window.onload = function() {
         graph.lifeBar(fighter2.health - 0, fighter2.x - 0, fighter2.y - 0);
 
         graph.spriteFighter(
-            fighter1Img,
-            FIGHTER_PICS_right[fighter1.state],
+            LEFT_SPRITE[fighter1State].img,
+            getRegion(fighter1Frame,LEFT_SPRITE[fighter1State], fighter1State !== "CROUCHING"),
             fighter1.x,
             fighter1.y,
             fighter1.state
         );
         graph.spriteFighter(
-            fighter2Img, 
-            FIGHTER_PICS_left[fighter2.state], 
-            fighter2.x, 
+            RIGHT_SPRITE[fighter2State].img,
+            getRegion(fighter2Frame,RIGHT_SPRITE[fighter2State], fighter1State !== "CROUCHING"),
+            fighter2.x,
             fighter2.y,
             fighter2.state
         );
+        date = newDate;
+        fighter1Frame++;
+        fighter2Frame++;
+
+    }
+
+    function getRegion(frame, spriteConfig, cyclic){
+        if (cyclic) {
+            frame = frame % spriteConfig.frames;
+        } else {
+           frame = frame > spriteConfig.frames ? spriteConfig.frames - 1 : frame;
+        }
+        return {
+            sx:(frame%spriteConfig.cols)*spriteConfig.width,
+            sy:(Math.floor(frame/spriteConfig.cols)%spriteConfig.rows)*spriteConfig.height,
+            sWidth:spriteConfig.width,
+            sHeight:spriteConfig.height
+        }
     }
 
     function renderCB(result) {
@@ -203,25 +323,26 @@ window.onload = function() {
             server.move("left");
         }
         if (event.keyCode == 83) { // KeyS
-            server.setState("CROUCHING");
+              server.setState("CROUCHING");
+        }
+        if (event.code === 'KeyA' || event.code === 'KeyD') {
+          server.setState("WALKING");
         }
     });
     document.addEventListener('keyup', function(event) {
-        if (event.keyCode == 83) { // KeyS
             server.setState("STANDING");
-        }
     });
     /*
     document..addEventListener('click', async function () {
         console.log(await server.hit("HITARM"));
     });
-    
+
     document.getElementById('hit_leg').addEventListener('click', async function () {
         console.log(await server.hit(0, "LEGKICK"));
     });
 
     document.getElementById('stand').addEventListener('click', async function () {
-        console.log(await server.setState(0, "STANDING"));
+        console.log(await server.setState(0, "STANDING_LEFT"));
     });
 
     document.getElementById('crouch').addEventListener('click', async function () {

@@ -1,12 +1,12 @@
 <?php
 class DB {
     function __construct() {
-        $servername = "127.0.0.1";
+        $servername = "mysql";
         $username = "root";
         $password = "";
         $dbname = "is_kombat";
         $this->connection = new mysqli($servername, $username, $password, $dbname);
-        if ($this->$connection->connect_error) {
+        if ($this->connection->connect_error) {
             die("Connection failed".$connection->connect_error);
         }
     }
@@ -44,7 +44,7 @@ class DB {
     public function getUserByLoginPass($login, $pass) {
         $query = "SELECT * FROM users WHERE login = '".$login."' AND password = '".$pass."'";
         $result = $this->connection->query($query);
-        return $this->oneRecord($result); 
+        return $this->oneRecord($result);
     }
     
     public function getUserByToken($token) {

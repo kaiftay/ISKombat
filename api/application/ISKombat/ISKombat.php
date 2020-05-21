@@ -11,7 +11,8 @@ class ISKombat {
         "JUMP" => "JUMP",
         "DEAD" => "DEAD",
         "HITARM" => "HITARM",
-        "HITLEG" => "HITLEG"
+        "HITLEG" => "HITLEG",
+        "WALK" => "WALK"
     );    
 
     const WIDTH = array(  
@@ -232,7 +233,6 @@ class ISKombat {
     public function move($userId, $direction) {
         $fighter = $this->db->getFighterByUserId($userId);
         $battle = $this->getBattleByUserId($userId);
-        if ($fighter->state == "STANDING" || $fighter->state == "CROUCHING" || $fighter->state == "JUMPING") {
             switch ($direction) {
                 case "right":
                     if ($fighter->x < $battle->right) {
@@ -246,7 +246,6 @@ class ISKombat {
                         return $this->db->moveFighter($fighter->id, $x, $direction);
                     }
                 break;    
-        }
         return false;
         }
     }
